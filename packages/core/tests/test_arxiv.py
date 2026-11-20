@@ -120,3 +120,9 @@ def test_parse_feed_no_authors() -> None:
     papers = parse_feed(xml)
     assert len(papers) == 1
     assert papers[0].authors == []
+
+# value error for empty title because title is required field in arxiv feed and it is an important field for the PaperMeta dataclass. If the title is empty, it indicates that the feed is malformed or incomplete, and it is not possible to create a valid PaperMeta object without a title. Therefore, raising a ValueError in this case is appropriate to signal that there is an issue with the input data.
+def test_parse_missing_title() -> None:
+    with pytest.raises(ValueError, match="Title not found"):
+        xml = make_feed([make_entry(title="")])
+        parse_feed(xml)

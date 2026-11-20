@@ -47,7 +47,9 @@ def _parse_entry(entry: ET.Element) -> PaperMeta:
 
     if pdf_url is None:
         raise ValueError(f"PDF link not found for {arxiv_id}")
-
+    if not title:
+        raise ValueError(f"Title not found for {arxiv_id}")
+    
     return PaperMeta(
         arxiv_id=arxiv_id,
         version=version,
