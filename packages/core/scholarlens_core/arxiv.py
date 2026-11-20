@@ -21,10 +21,13 @@ ATOM = {"a": "http://www.w3.org/2005/Atom"}
 
 def extract_arxiv_id(id_url: str) -> tuple[str, int]:
     """'http://arxiv.org/abs/1706.03762v7' -> ('1706.03762', 7)"""
-    parts = id_url.split("/abs/")[1]
-    arxiv_id, version_str = parts.rsplit("v", maxsplit=1)
-    version = int(version_str)
-    return arxiv_id, version
+    try:
+        parts = id_url.split("/abs/")[1]
+        arxiv_id, version_str = parts.rsplit("v", maxsplit=1)
+        version = int(version_str)
+        return arxiv_id, version
+    except (IndexError, ValueError):
+        raise ValueError(f"Invalid arXiv ID: {id_url}")
 
 
 def _parse_entry(entry: ET.Element) -> PaperMeta:
@@ -41,6 +44,9 @@ def _parse_entry(entry: ET.Element) -> PaperMeta:
         if link.get("title") == "pdf":
             pdf_url = link.get("href")
             break
+
+    if pdf_url is None:
+        raise ValueError(f"PDF link not found for {arxiv_id}")
 
     return PaperMeta(
         arxiv_id=arxiv_id,

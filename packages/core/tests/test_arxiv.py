@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import pytest
 from scholarlens_core.arxiv import extract_arxiv_id, parse_feed
 
 SAMPLE = """<?xml version="1.0" encoding="UTF-8"?>
@@ -19,12 +19,16 @@ SAMPLE = """<?xml version="1.0" encoding="UTF-8"?>
 </feed>"""
 
 
-def test_extract_new_style_id() -> None:
-    assert extract_arxiv_id("http://arxiv.org/abs/1706.03762v7") == ("1706.03762", 7)
-
-
-def test_extract_old_style_id() -> None:
-    assert extract_arxiv_id("http://arxiv.org/abs/hep-th/9901001v1") == ("hep-th/9901001", 1)
+@pytest.mark.parametrize(
+        "id_url,expected",
+        [
+            ("http://arxiv.org/abs/1706.03762v7", ("1706.03762", 7)),
+            ("http://arxiv.org/abs/hep-th/9901001v1", ("hep-th/9901001", 1)),
+            ("http://arxiv.org/abs/solv-int/9901001v1", ("solv-int/9901001", 1)),
+        ],
+)
+def test_extract_arxiv_id(id_url: str, expected: tuple[str, int]) -> None:
+    assert extract_arxiv_id(id_url) == expected
 
 
 def test_parse_feed_basic_fields() -> None:
@@ -45,5 +49,16 @@ def test_parse_empty_feed() -> None:
     assert parse_feed(empty) == []
 
 
-def test_extract_id_with_v_in_category() -> None:
-    assert extract_arxiv_id("http://arxiv.org/abs/solv-int/9901001v1") == ("solv-int/9901001", 1)
+def test_entry_without_pdf_link_raises() -> None:
+    xml = SAMPLE.replace('title="pdf"', 'title="notpdf"')
+    with pytest.raises(ValueError, match="PDF link not found"):
+        parse_feed(xml)
+
+
+@pytest.mark.parametrize(
+    "bad_url",
+    ["bad_url1", "http://arxiv.org/abs/1706.03762","http://arxiv.org/abs/", "http://arxiv.org/abs/1706.03762vX"]
+)
+def test_bad_url(bad_url: str) -> None:
+    with pytest.raises(ValueError, match="Invalid arXiv ID"):
+        extract_arxiv_id(bad_url)
