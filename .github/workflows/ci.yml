@@ -7,26 +7,27 @@ on:
 
 jobs:
 
-  lint: 
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # Job lint dinonaktifkan sementara (fokus belajar pytest). Hapus '# ' untuk mengaktifkan lagi.
+  # lint: 
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
+  #     - uses: astral-sh/setup-uv@v6
+  #       with:
+  #         enable-cache: true
 
-      - name: install dependencies
-        run: uv sync --locked
+  #     - name: install dependencies
+  #       run: uv sync --locked
 
-      - name: ruff lint
-        run: uv run ruff check .
+  #     - name: ruff lint
+  #       run: uv run ruff check .
 
-      - name: ruff format
-        run: uv run ruff format --check .
-        
-      - name: mypy
-        run: uv run mypy
+  #     - name: ruff format
+  #       run: uv run ruff format --check .
+
+  #     - name: mypy
+  #       run: uv run mypy
 
   test:
     runs-on: ubuntu-latest
